@@ -70,7 +70,7 @@ gcj2wgs <- function(gcjLat, gcjLon){
   w0 <- g0
   g1 <- wgs2gcj(w0[1], w0[2])
   w1 <- w0 - (g1 - g0)
-  while(max(abs(w1 - w0)) >= 1e-5){
+  while(max(abs(w1 - w0)) >= 1e-6){
     w0 <- w1
     g1 <- wgs2gcj(w0[1], w0[2])
     w1 <- w0 - (g1 - g0)
