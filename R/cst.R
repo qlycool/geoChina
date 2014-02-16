@@ -18,7 +18,7 @@ wgs2gcj <- function(wgsLat, wgsLon){
   if(outofChina(wgsLat, wgsLon)){
     gcjLat <- wgsLat
     gcjLon <- wgsLat
-    return(c(gcjLat, gcjLon))
+    return(data.frame(lat = gcjLat, lng = gcjLon))
   }
   
   dLat <- transformLat(wgsLon - 105.0, wgsLat - 35.0)
@@ -31,7 +31,7 @@ wgs2gcj <- function(wgsLat, wgsLon){
   dLon <- (dLon * 180.0) / (a / sqrtMagic * cos(radLat) * pi)
   gcjLat <- wgsLat + dLat
   gcjLon <- wgsLon + dLon
-  return(c(gcjLat, gcjLon))
+  return(data.frame(lat = gcjLat, lng = gcjLon))
 }
 
 outofChina <- function(lat, lon){
@@ -58,6 +58,10 @@ transformLon <- function(x, y){
 ### WGS-84 => GCJ-02 ###
 
 ### GCJ-02 => WGS-84 ###
+# coordinates encrytion algorithm must ensure the relative position correct. 
+# If point A is close to point B in GCJ-02 system, this relative spatial 
+# relationship persists in WGS-84 system. therefore, when two points are close, 
+# we can approximate to the right coordinates with the iteration algorithm.
 # wgs => gcj
 # offset dV = V' - V
 # question: gcj => wgs, namely V = V' - dV'
@@ -75,7 +79,7 @@ gcj2wgs <- function(gcjLat, gcjLon){
     g1 <- wgs2gcj(w0[1], w0[2])
     w1 <- w0 - (g1 - g0)
   }
-  return(w1)
+  return(data.frame(lat = w1[1], lng = w1[2]))
 }
 ### GCJ-02 => WGS-84 ###
 
@@ -86,26 +90,127 @@ gcj2bd <- function(gcjLat, gcjLon){
   theta <- atan2(gcjLat, gcjLon) + 0.000003 * cos(gcjLon * pi * 3000.0 / 180.0)
   bdLon = z * cos(theta) + 0.0065
   bdLat = z * sin(theta) + 0.006
-  return(c(bdLat, bdLon))
+  return(data.frame(lat = bdLat, lng = bdLon))
 }
 
-bd2gcj <- function(bdLat, bLon){
+bd2gcj <- function(bdLat, bdLon){
   x <- bdLon - 0.0065
   y <- bdLat - 0.006  
   z <- sqrt(x^2 + y^2) - 0.00002 * sin(y * pi * 3000.0 / 180.0)
   theta <- atan2(y, x) - 0.000003 * cos(x * pi * 3000.0 / 180.0)  
   gcjLon <- z * cos(theta)  
   gcjLat <- z * sin(theta)
-  return(c(gcjLat, gcjLon))
+  return(data.frame(lat = gcjLat, lng = gcjLon))
 }
-### GCJ-02 <=> BD-09 ###
+### GCJ-02 => BD-09 ###
 
-### WGS-84 <=> BD-09
+### BD-09 => GCJ-02 ###
+# iteration algorithm same to gcj2wgs function
+# bd2gcj <- function(bdLat, bdLon){
+#   b0 <- c(bdLat, bdLon)
+#   g0 <- b0
+#   b1 <- gcj2bd(g0[1], g0[2])
+#   g1 <- g0 - (b1 - b0)
+#   while(max(abs(g1 - g0)) >= 1e-6){
+#     g0 <- g1
+#     b1 <- gcj2bd(g0[1], g0[2])
+#     g1 <- g0 - (b1 - b0)
+#   }
+#   return(data.frame(lat = g1[1], lng = g[2]))
+# }
+### BD-09 => GCJ-02 ###
+
+### WGS-84 <=> BD-09 ###
 wgs2bd <- function(wgsLat, wgsLon){
-  return(gcj2bd(wgs2gcj(wgsLat, wgsLon)))
+  return(gcj2bd(wgs2gcj(wgsLat, wgsLon)[, 'lat'], wgs2gcj(wgsLat, wgsLon)[, 'lng']))
 }
 
 bd2wgs <- function(bdLat, bdLon){
-  return(gcj2wgs(bd2gcj(bdLat, bdLon)))
+  return(gcj2wgs(bd2gcj(bdLat, bdLon)[, 'lat'], bd2gcj(bdLat, bdLon)[, 'lng']))
 }
-### WGS-84 <=> BD-09
+### WGS-84 <=> BD-09 ###
+
+### convert by calling baidu api ###
+library(RCurl)
+library(RJSONIO)
+
+conv <- function(lat, lon, from = c('WGS-84', 'GCJ-02', 'BD-09'), 
+                 to = c('WGS-84', 'GCJ-02', 'BD-09'), api = FALSE){
+  # check parameters
+  stopifnot(is.numeric(lat))
+  stopifnot(is.numeric(lon))
+  from <- match.arg(from)
+  to <- match.arg(to)
+  stopifnot(is.logical(api))
+  
+  if(from == to){
+    return(data.frame(lat = lat, lng = lon))
+  } else{
+    if(api){
+      # coordinate system lookup table
+      code <- c(0, 2, 4)
+      names(code) <- c('WGS-84', 'GCJ-02', 'BD-09')
+      f <- code[from]
+      t <- code[to]
+      
+      # format url
+      # http://api.map.baidu.com/ag/coord/convert?x=lon&y=lat&from=FROM&to=TO
+      url_string <- paste('http://api.map.baidu.com/ag/coord/convert?x=', lon, 
+                          '&y=', lat, '&from=', f, '&to=', t, sep = '')
+      url_string <- URLencode(url_string)
+      message(paste('calling ', url_string, ' ... ', sep = ''), appendLF = F)
+      
+      # convert
+      connect <- url(url_string)
+      cv <- fromJSON(paste(readLines(connect, warn = FALSE), collapse = ''), drop = FALSE)
+      message('done.')  
+      close(connect)
+      
+      # did convert fail?
+      if(is.list(cv)){
+        if(cv$error == 0){
+          cvdf <- with(cv, {data.frame(lat = as.numeric(base64(y, FALSE)), 
+                                       lng = as.numeric(base64(x, FALSE)), 
+                                       row.names = NULL)})
+          return(cvdf)
+        }
+      } else{
+        warning(paste('convert failed with error ', cv['error'], sep = ''), 
+                call. = FALSE)
+        return(data.frame(lat = NA, lng = NA))
+      }
+    } else{
+      if(from == 'WGS-84' & to == 'GCJ-02') return(wgs2gcj(lat, lon))
+      if(from == 'WGS-84' & to == 'BD-09') return(wgs2bd(lat, lon))
+      if(from == 'GCJ-02' & to == 'WGS-84') return(gcj2wgs(lat, lon))
+      if(from == 'GCJ-02' & to == 'BD-09') return(gcj2bd(lat, lon))
+      if(from == 'BD-09' & to == 'WGS-84') return(bd2wgs(lat, lon))
+      if(from == 'BD-09' & to == 'GCJ-02') return(bd2gcj(lat, lon))
+    }
+  }
+}
+### convert by calling baidu api ###
+
+# 北京站
+# WGS-84 (39.90105, 116.42079)
+# GCJ-02 (39.90245, 116.42703)
+# BD-09  (39.90851, 116.43351)
+# verifying
+# wgs2gcj(39.90105, 116.42079) # correct
+# conv(39.90105, 116.42079, from = 'WGS-84', to = 'GCJ-02')
+# conv(39.90105, 116.42079, from = 'WGS-84', to = 'GCJ-02', api = TRUE)
+# wgs2bd(39.90105, 116.42079) # correct
+# conv(39.90105, 116.42079, from = 'WGS-84', to = 'BD-09')
+# conv(39.90105, 116.42079, from = 'WGS-84', to = 'BD-09', api = TRUE)
+# gcj2wgs(39.90245, 116.42703) # correct verifying by google earth
+# conv(39.90245, 116.42703, from = 'GCJ-02', to = 'WGS-84')
+# conv(39.90245, 116.42703, from = 'GCJ-02', to = 'WGS-84', api = TRUE)
+# gcj2bd(39.90245, 116.42703) # correct
+# conv(39.90245, 116.42703, from = 'GCJ-02', to = 'BD-09')
+# conv(39.90245, 116.42703, from = 'GCJ-02', to = 'BD-09', api = TRUE)
+# bd2gcj(39.90851, 116.43351) # correct
+# conv(39.90851, 116.43351, from = 'BD-09', to = 'GCJ-02')
+# conv(39.90851, 116.43351, from = 'BD-09', to = 'GCJ-02', api = TRUE)
+# bd2wgs(39.90851, 116.43351) # correct verifying by google earth
+# conv(39.90851, 116.43351, from = 'BD-09', to = 'WGS-84')
+# conv(39.90851, 116.43351, from = 'BD-09', to = 'WGS-84', api = TRUE)
