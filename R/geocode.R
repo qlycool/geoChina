@@ -1,6 +1,5 @@
 source('R/cst.R')
-
-g <- NULL
+library(plyr)
 
 geocode <- function(address, api = c('google', 'baidu'), key = '', 
                     ocs = c('WGS-84', 'GCJ-02', 'BD-09'), 
@@ -15,7 +14,16 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
   
   # vectorize for many addresses
   if(length(address) > 1){
-    
+    if(api == 'google'){
+      s <- 'google restricts requests to 2500 requests a day.'
+      if(length(address) > 2500) stop(s, call. = F)
+      if(length(address) > 200 & messaging) message(paste('Reminder', s, sep = ' : '))
+    }
+          
+    if(output == 'latlng' | output == 'latlngc'){
+      return(ldply(as.list(address), geocode, api = api, key = key, ocs = ocs, 
+                   output = output, messaging = messaging))
+    }
   }
   
   # format url
@@ -100,15 +108,22 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
 }
 
 # geocode('inexisting place', api = 'google', ocs = 'WGS-84', messaging = TRUE)
-# geocode('Beijing railway station', api = 'google', ocs = 'GCJ-02', messaging = TRUE)
+# geocode(c('Tsinghua University', 'Beijing railway station'), api = 'google', 
+# ocs = 'GCJ-02', messaging = TRUE)
 # geocode('Beijing railway station', api = 'google', ocs = 'GCJ-02', output = 'latlngc', 
 #         messaging = TRUE)
+# geocode(c('Tsinghua University', 'Beijing railway station'), api = 'google', 
+#         ocs = 'GCJ-02', output = 'latlngc', messaging = TRUE)
 # geocode('北京火车站', api = 'google', ocs = 'GCJ-02', messaging = TRUE)
 # geocode('北京站', api = 'google', ocs = 'WGS-84', messaging = TRUE)
 # geocode('北京站', api = 'baidu', ocs = 'WGS-84', messaging = TRUE)
 # geocode('北京火车站', api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'BD-09', 
 #         messaging = TRUE)
+# geocode(c('清华大学', '北京火车站'), api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'BD-09', 
+#         messaging = TRUE)
 # geocode('北京火车站', api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'BD-09', 
+#         output = 'latlngc', messaging = TRUE)
+# geocode(c('清华大学', '北京火车站'), api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'BD-09', 
 #         output = 'latlngc', messaging = TRUE)
 # geocode('北京市北京火车站', api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'GCJ-02', 
 #         messaging = TRUE)
