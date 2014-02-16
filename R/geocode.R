@@ -3,11 +3,13 @@ source('R/cst.R')
 g <- NULL
 
 geocode <- function(address, api = c('google', 'baidu'), key = '', 
-                    ocs = c('WGS-84', 'GCJ-02', 'BD-09'), messaging = FALSE){
+                    ocs = c('WGS-84', 'GCJ-02', 'BD-09'), 
+                    output = c('latlng', 'latlngc'), messaging = FALSE){
   # check parameters
   stopifnot(is.character(address))
-  stopifnot(is.character(key))
   api <- match.arg(api)
+  stopifnot(is.character(key))
+  output <- match.arg(output)
   ocs <- match.arg(ocs)
   stopifnot(is.logical(messaging))
   
@@ -66,9 +68,14 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
     gcdf <- with(gc$results[[1]], {
       data.frame(lat = NULLtoNA(geometry$location['lat']), 
                  lng = NULLtoNA(geometry$location['lng']), 
+                 loctype = tolower(NULLtoNA(geometry$location_type)), 
                  row.names = NULL)})
     
-    return(conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'GCJ-02', to = ocs))
+    # convert coordinates
+    gcdf[, c('lat', 'lng')] <- conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'GCJ-02', to = ocs)
+    
+    if(output == 'latlng') return(gcdf[, c('lat', 'lng')])
+    if(output == 'latlngc') return(gcdf[, c('lat', 'lng', 'loctype')])
   }
   if(api == 'baidu'){
     # did geocode fail?
@@ -79,22 +86,30 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
       return(data.frame(lat = NA, lng = NA))  
     }
     
-    gcdf <- with(gc$result, {
-      data.frame(lat = NULLtoNA(location['lat']), 
-                 lng = NULLtoNA(location['lng']), 
-                 row.names = NULL)})
+    gcdf <- with(gc$result, {data.frame(lat = NULLtoNA(location['lat']), 
+                                        lng = NULLtoNA(location['lng']), 
+                                        conf = NULLtoNA(confidence), 
+                                        row.names = NULL)})
     
-    return(conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'BD-09', to = ocs))
+    # convert coordinates
+    gcdf[, c('lat', 'lng')] <- conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'BD-09', to = ocs)
+    
+    if(output == 'latlng') return(gcdf[, c('lat', 'lng')])
+    if(output == 'latlngc') return(gcdf[, c('lat', 'lng', 'conf')])
   }
 }
 
 # geocode('inexisting place', api = 'google', ocs = 'WGS-84', messaging = TRUE)
 # geocode('Beijing railway station', api = 'google', ocs = 'GCJ-02', messaging = TRUE)
+# geocode('Beijing railway station', api = 'google', ocs = 'GCJ-02', output = 'latlngc', 
+#         messaging = TRUE)
 # geocode('北京火车站', api = 'google', ocs = 'GCJ-02', messaging = TRUE)
 # geocode('北京站', api = 'google', ocs = 'WGS-84', messaging = TRUE)
 # geocode('北京站', api = 'baidu', ocs = 'WGS-84', messaging = TRUE)
 # geocode('北京火车站', api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'BD-09', 
 #         messaging = TRUE)
+# geocode('北京火车站', api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'BD-09', 
+#         output = 'latlngc', messaging = TRUE)
 # geocode('北京市北京火车站', api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'GCJ-02', 
 #         messaging = TRUE)
 # geocode('北京市北京火车站', api = 'baidu', key = 'kgR30zPz0Rp7f36obLDtiEjK', ocs = 'WGS-84', 
