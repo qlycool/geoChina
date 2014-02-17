@@ -1,4 +1,3 @@
-source('R/cst.R')
 library(plyr)
 
 geocode <- function(address, api = c('google', 'baidu'), key = '', 
@@ -54,6 +53,7 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
   # format geocoded data
   NULLtoNA <- function(x){
     if(is.null(x)) return(NA)
+    if(is.character(x) & nchar(x) == 0) return(NA)
     x
   }
   
@@ -69,7 +69,7 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
     # more than one location found?
     if(length(gc$results) > 1 && messaging){
       message(paste('more than one location found for "', address, 
-                    '", using address\n  "', tolower(gc$results[[1]]$formatted_address), 
+                    '", using address\n"', tolower(gc$results[[1]]$formatted_address), 
                     '"\n', sep = ''))
     }
     
@@ -80,10 +80,10 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
                  row.names = NULL)})
     
     # convert coordinates
-    gcdf[, c('lat', 'lng')] <- conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'GCJ-02', to = ocs)
+    gcdf[c('lat', 'lng')] <- conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'GCJ-02', to = ocs)
     
-    if(output == 'latlng') return(gcdf[, c('lat', 'lng')])
-    if(output == 'latlngc') return(gcdf[, c('lat', 'lng', 'loctype')])
+    if(output == 'latlng') return(gcdf[c('lat', 'lng')])
+    if(output == 'latlngc') return(gcdf[c('lat', 'lng', 'loctype')])
   }
   if(api == 'baidu'){
     # did geocode fail?
@@ -91,7 +91,7 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
       warning(paste('geocode failed with status code ', gc$status, ', location = "', 
                     address, '". see more details in the response code table of Baidu Geocoding API', 
                     sep = ''), call. = FALSE)
-      return(data.frame(lat = NA, lng = NA))  
+      return(data.frame(lat = NA, lng = NA))
     }
     
     gcdf <- with(gc$result, {data.frame(lat = NULLtoNA(location['lat']), 
@@ -100,10 +100,10 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
                                         row.names = NULL)})
     
     # convert coordinates
-    gcdf[, c('lat', 'lng')] <- conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'BD-09', to = ocs)
+    gcdf[c('lat', 'lng')] <- conv(gcdf[, 'lat'], gcdf[, 'lng'], from = 'BD-09', to = ocs)
     
-    if(output == 'latlng') return(gcdf[, c('lat', 'lng')])
-    if(output == 'latlngc') return(gcdf[, c('lat', 'lng', 'conf')])
+    if(output == 'latlng') return(gcdf[c('lat', 'lng')])
+    if(output == 'latlngc') return(gcdf[c('lat', 'lng', 'conf')])
   }
 }
 
