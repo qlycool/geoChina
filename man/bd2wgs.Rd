@@ -1,61 +1,39 @@
 \name{bd2wgs}
 \alias{bd2wgs}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-%%  ~~function to do ... ~~
-}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\title{Convert coordinates}
 \usage{
 bd2wgs(bdLat, bdLon)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{bdLat}{
-%%     ~~Describe \code{bdLat} here~~
-}
-  \item{bdLon}{
-%%     ~~Describe \code{bdLon} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
+  \item{bdLat}{a numeric latitude in BD-09}
+
+  \item{bdLon}{a numeric longitude in BD-09}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+a data.frame with variables lat/lng
 }
-\references{
-%% ~put references to the literature/web site here ~
+\description{
+converts lat/lon coordintes from BD-09 to WGS-84
 }
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\details{
+convert BD-09 coordinates first into GCJ-02, then into
+WGS-84.
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (bdLat, bdLon) 
-{
-    return(gcj2wgs(bd2gcj(bdLat, bdLon)))
-  }
+\dontrun{
+# latitude/longitude coordinates of Beijing railway station
+# WGS-84: (39.90105, 116.42079)
+# BD-09:  (39.90851, 116.43351)
+bd2wgs(39.90851, 116.43351) # correct verifying by google earth
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+}
+\author{
+Jun Cai (\email{cai-j12@mails.tsinghua.edu.cn}), PhD
+student from Center for Earth System Science, Tsinghua
+University
+}
+\seealso{
+\code{\link{bd2gcj}}, \code{\link{gcj2wgs}},
+\code{\link{conv}}.
+}
+

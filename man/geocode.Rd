@@ -1,0 +1,77 @@
+\name{geocode}
+\alias{geocode}
+\title{Geocode}
+\usage{
+geocode(address, api = c("google", "baidu"), key = "", ocs = c("WGS-84",
+  "GCJ-02", "BD-09"), output = c("latlng", "latlngc"), messaging = FALSE)
+}
+\arguments{
+  \item{address}{a character string specifying a location
+  of interest (e.g. "Tsinghua Univeristy")}
+
+  \item{api}{use google or baidu maps api}
+
+  \item{key}{an api key must be provided when calling baidu
+  maps api. While it's unnecessary for calling google maps
+  api.}
+
+  \item{ocs}{output coordinate systems including WGS-84,
+  GCJ-02 and BD-09, which are the GCSs of Google Earth,
+  Google Map in China and Baidu Map, respectively.}
+
+  \item{output}{lat/lng coordinates or lat/lng coordinates
+  with confidence}
+
+  \item{messaging}{turn messaging on/off}
+}
+\value{
+a data.frame with variables lat/lng or lat/lng/conf
+}
+\description{
+geocodes an address using Google or Baidu Maps.  Note that
+in most cases by using this function you are agreeing to
+the Google Maps API Terms of Service at
+\url{https://developers.google.com/maps/terms} or the Baidu
+Maps API Terms of Use at
+\url{http://developer.baidu.com/map/law.htm}.
+}
+\details{
+note that the google maps api limits to 2500 queries a day.
+}
+\examples{
+\dontrun{
+geocode('Tsinghua University', api = 'google', ocs = 'GCJ-02')
+geocode('Tsinghua University', api = 'google', ocs = 'WGS-84',
+        messaging = TRUE)
+geocode('Beijing railway station', api = 'google', ocs = 'WGS-84',
+        output = 'latlngc')
+geocode(c('Tsinghua University', 'Beijing railway station'), api = 'google',
+        ocs = 'GCJ-02')
+geocode(c('Tsinghua University', 'Beijing railway station'), api = 'google',
+        ocs = 'WGS-84', output = 'latlngc', messaging = TRUE)
+geocode('Beijing railway station', api = 'baidu', key = 'your baidu maps api key',
+        ocs = 'BD-09')
+geocode('Beijing railway station', api = 'baidu', key = 'your baidu maps api key',
+        ocs = 'GCJ-02', messaging = TRUE)
+geocode('Beijing railway station', api = 'baidu', key = 'your baidu maps api key',
+        ocs = 'BD-09', output = 'latlngc')
+geocode(c('Tsinghua University', 'Beijing railway station'), api = 'baidu',
+        key = 'your baidu maps api key', ocs = 'BD-09')
+geocode(c('Tsinghua University', 'Beijing railway station'), api = 'baidu',
+        key = 'your baidu maps api key', ocs = 'WGS-84', output = 'latlngc')
+}
+}
+\author{
+Jun Cai (\email{cai-j12@mails.tsinghua.edu.cn}), PhD
+student from Center for Earth System Science, Tsinghua
+University
+}
+\seealso{
+\code{\link{revgeocode}}.
+
+Google Maps API at
+\url{http://code.google.com/apis/maps/documentation/geocoding/}
+and Baidu Maps API at
+\url{http://developer.baidu.com/map/webservice-geocoding.htm}
+}
+

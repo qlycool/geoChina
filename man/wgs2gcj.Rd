@@ -1,77 +1,47 @@
 \name{wgs2gcj}
 \alias{wgs2gcj}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-%%  ~~function to do ... ~~
-}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\title{Convert coordinates}
 \usage{
 wgs2gcj(wgsLat, wgsLon)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{wgsLat}{
-%%     ~~Describe \code{wgsLat} here~~
-}
-  \item{wgsLon}{
-%%     ~~Describe \code{wgsLon} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
+  \item{wgsLat}{a numeric latitude in WGS-84}
+
+  \item{wgsLon}{a numeric longitude in WGS-84}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+a data.frame with variables lat/lng
 }
-\references{
-%% ~put references to the literature/web site here ~
+\description{
+converts lat/lon coordintes from WGS-84 to GCJ-02
 }
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\details{
+for the sake of information security, all real WGS-84
+latitude/longitude coordites must be encrypted by National
+Admistration of Surveying, Mapping and Geoinformation
+(\url{http://en.sbsm.gov.cn/}) into GCJ-02 (known as 'Mars
+coordinate system') with a deviation no more than 700
+meters in China. Though the encryption algorithm is highly
+confidential, the conversion algorithm is a public secrect
+on the Internet and verfied to be correct.
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (wgsLat, wgsLon) 
-{
-    if (outofChina(wgsLat, wgsLon)) {
-        gcjLat <- wgsLat
-        gcjLon <- wgsLat
-        return(c(gcjLat, gcjLon))
-    }
-    dLat <- transformLat(wgsLon - 105, wgsLat - 35)
-    dLon <- transformLon(wgsLon - 105, wgsLat - 35)
-    radLat <- wgsLat/180 * pi
-    magic <- sin(radLat)
-    magic <- 1 - ee * magic * magic
-    sqrtMagic <- sqrt(magic)
-    dLat <- (dLat * 180)/((a * (1 - ee))/(magic * sqrtMagic) * 
-        pi)
-    dLon <- (dLon * 180)/(a/sqrtMagic * cos(radLat) * pi)
-    gcjLat <- wgsLat + dLat
-    gcjLon <- wgsLon + dLon
-    return(c(gcjLat, gcjLon))
-  }
+\dontrun{
+# latitude/longitude coordinates of Beijing railway station
+# WGS-84: (39.90105, 116.42079)
+# GCJ-02: (39.90245, 116.42703)
+wgs2gcj(39.90105, 116.42079) # correct
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+}
+\author{
+Jun Cai (\email{cai-j12@mails.tsinghua.edu.cn}), PhD
+student from Center for Earth System Science, Tsinghua
+University
+}
+\seealso{
+\code{\link{gcj2wgs}}, \code{\link{conv}}.
+
+\url{https://on4wp7.codeplex.com/SourceControl/changeset/view/21483#353936}
+for C version source code.
+}
+

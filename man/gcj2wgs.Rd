@@ -1,70 +1,49 @@
 \name{gcj2wgs}
 \alias{gcj2wgs}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-%%  ~~function to do ... ~~
-}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\title{Convert coordinates}
 \usage{
 gcj2wgs(gcjLat, gcjLon)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{gcjLat}{
-%%     ~~Describe \code{gcjLat} here~~
-}
-  \item{gcjLon}{
-%%     ~~Describe \code{gcjLon} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
+  \item{gcjLat}{a numeric latitude in GCJ-02}
+
+  \item{gcjLon}{a numeric longitude in GCJ-02}
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+a data.frame with variables lat/lng
 }
-\references{
-%% ~put references to the literature/web site here ~
+\description{
+converts lat/lon coordintes from GCJ-02 to WGS-84
 }
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\details{
+since the encryption function from WGS-84 to GCJ-02 doesn't
+have inverse function, the inverse transformation can only
+be achieved by numeric algorithm. Coordinates encryption
+algorithm must ensure the relative position correct; that
+is to say, if point A is close to point B in GCJ-02 system,
+this relative spatial relationship persists in WGS-84
+system. Therefore, when two points are close, we can
+approximate to the right coordinates with the iteration
+algorithm.
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (gcjLat, gcjLon) 
-{
-    g0 <- c(gcjLat, gcjLon)
-    w0 <- g0
-    g1 <- wgs2gcj(w0[1], w0[2])
-    w1 <- w0 - (g1 - g0)
-    while (max(abs(w1 - w0)) >= 1e-05) {
-        w0 <- w1
-        g1 <- wgs2gcj(w0[1], w0[2])
-        w1 <- w0 - (g1 - g0)
-    }
-    return(w1)
-  }
+\dontrun{
+# latitude/longitude coordinates of Beijing railway station
+# WGS-84: (39.90105, 116.42079)
+# GCJ-02: (39.90245, 116.42703)
+gcj2wgs(39.90245, 116.42703) # correct verifying by google earth
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+}
+\author{
+Jun Cai (\email{cai-j12@mails.tsinghua.edu.cn}), PhD
+student from Center for Earth System Science, Tsinghua
+University
+}
+\seealso{
+\code{\link{wgs2gcj}}, \code{\link{conv}}.
+
+the comments of blog
+\url{http://blog.csdn.net/coolypf/article/details/8686588}
+in Chinese
+}
+

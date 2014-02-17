@@ -1,9 +1,6 @@
-# Coordinate transformation algorithms for coordinate systems including WGS-84, 
-# GCJ-02 and BD-09
+# RGVkaWNhdGVkIHRvIEppYW8gSGFvc29uZy4gSSBsb3ZlIHUh
 
 ### WGS-84 => GCJ-02 ###
-# reference: https://on4wp7.codeplex.com/SourceControl/changeset/view/21483#353936
-
 # Krasovsky 1940 ellipsoid parameters
 # semi-major axis
 a <- 6378245.0
@@ -13,6 +10,34 @@ f <- 0.00335233
 # semi-minor axis
 b <- a * (1 - f)
 ee <- (a^2 - b^2) / a^2
+
+#' Convert coordinates
+#'
+#' converts lat/lon coordintes from WGS-84 to GCJ-02
+#' 
+#' @param wgsLat a numeric latitude in WGS-84
+#' @param wgsLon a numeric longitude in WGS-84
+#' @return a data.frame with variables lat/lng
+#' @author Jun Cai (\email{cai-j12@@mails.tsinghua.edu.cn}), PhD student from 
+#' Center for Earth System Science, Tsinghua University
+#' @details for the sake of information security, all real WGS-84 latitude/longitude 
+#' coordites must be encrypted by National Admistration of Surveying, Mapping 
+#' and Geoinformation (\url{http://en.sbsm.gov.cn/}) into GCJ-02 (known as 'Mars 
+#' coordinate system') with a deviation no more than 700 meters in China. Though 
+#' the encryption algorithm is highly confidential, the conversion algorithm is 
+#' a public secrect on the Internet and verfied to be correct.
+#' @seealso \code{\link{gcj2wgs}}, \code{\link{conv}}.
+#' 
+#' \url{https://on4wp7.codeplex.com/SourceControl/changeset/view/21483#353936} 
+#' for C version source code.
+#' @export
+#' @examples
+#' \dontrun{
+#' # latitude/longitude coordinates of Beijing railway station
+#' # WGS-84: (39.90105, 116.42079)
+#' # GCJ-02: (39.90245, 116.42703)
+#' wgs2gcj(39.90105, 116.42079) # correct
+#' }
 
 wgs2gcj <- function(wgsLat, wgsLon){
   if(outofChina(wgsLat, wgsLon)){
@@ -57,11 +82,36 @@ transformLon <- function(x, y){
 }
 ### WGS-84 => GCJ-02 ###
 
+#' Convert coordinates
+#'
+#' converts lat/lon coordintes from GCJ-02 to WGS-84
+#' 
+#' @param gcjLat a numeric latitude in GCJ-02
+#' @param gcjLon a numeric longitude in GCJ-02
+#' @return a data.frame with variables lat/lng
+#' @author Jun Cai (\email{cai-j12@@mails.tsinghua.edu.cn}), PhD student from 
+#' Center for Earth System Science, Tsinghua University
+#' @details since the encryption function from WGS-84 to GCJ-02 doesn't have 
+#' inverse function, the inverse transformation can only be achieved by numeric 
+#' algorithm. Coordinates encryption algorithm must ensure the relative position 
+#' correct; that is to say, if point A is close to point B in GCJ-02 system, this 
+#' relative spatial relationship persists in WGS-84 system. Therefore, when two 
+#' points are close, we can approximate to the right coordinates with the iteration 
+#' algorithm.
+#' @seealso \code{\link{wgs2gcj}}, \code{\link{conv}}.
+#' 
+#' the comments of blog \url{http://blog.csdn.net/coolypf/article/details/8686588} 
+#' in Chinese
+#' @export
+#' @examples
+#' \dontrun{
+#' # latitude/longitude coordinates of Beijing railway station
+#' # WGS-84: (39.90105, 116.42079)
+#' # GCJ-02: (39.90245, 116.42703)
+#' gcj2wgs(39.90245, 116.42703) # correct verifying by google earth
+#' }
+
 ### GCJ-02 => WGS-84 ###
-# coordinates encrytion algorithm must ensure the relative position correct. 
-# If point A is close to point B in GCJ-02 system, this relative spatial 
-# relationship persists in WGS-84 system. therefore, when two points are close, 
-# we can approximate to the right coordinates with the iteration algorithm.
 # wgs => gcj
 # offset dV = V' - V
 # question: gcj => wgs, namely V = V' - dV'
@@ -83,8 +133,31 @@ gcj2wgs <- function(gcjLat, gcjLon){
 }
 ### GCJ-02 => WGS-84 ###
 
+#' Convert coordinates
+#'
+#' converts lat/lon coordintes from GCJ-02 to BD-09
+#' 
+#' @param gcjLat a numeric latitude in GCJ-02
+#' @param gcjLon a numeric longitude in GCJ-02
+#' @return a data.frame with variables lat/lng
+#' @author Jun Cai (\email{cai-j12@@mails.tsinghua.edu.cn}), PhD student from 
+#' Center for Earth System Science, Tsinghua University
+#' @details BD-09 coordinate system is used by Baidu Maps and encrypted based on 
+#' GCJ-02 coordinates for information safety.
+#' @seealso \code{\link{bd2gcj}}, \code{\link{conv}}.
+#' 
+#' \url{http://blog.csdn.net/coolypf/article/details/8569813} for C version 
+#' source code.
+#' @export
+#' @examples
+#' \dontrun{
+#' # latitude/longitude coordinates of Beijing railway station
+#' # GCJ-02: (39.90245, 116.42703)
+#' # BD-09:  (39.90851, 116.43351)
+#' gcj2bd(39.90245, 116.42703) # correct
+#' }
+
 ### GCJ-02 <=> BD-09 ###
-# reference: http://blog.csdn.net/coolypf/article/details/8569813
 gcj2bd <- function(gcjLat, gcjLon){
   z <- sqrt(gcjLon^2 + gcjLat^2) + 0.00002 * sin(gcjLat * pi * 3000.0 / 180.0)
   theta <- atan2(gcjLat, gcjLon) + 0.000003 * cos(gcjLon * pi * 3000.0 / 180.0)
@@ -92,6 +165,30 @@ gcj2bd <- function(gcjLat, gcjLon){
   bdLat = z * sin(theta) + 0.006
   return(data.frame(lat = bdLat, lng = bdLon))
 }
+
+#' Convert coordinates
+#'
+#' converts lat/lon coordintes from BD-09 to GCJ-02
+#' 
+#' @param bdLat a numeric latitude in BD-09
+#' @param bdLon a numeric longitude in BD-09
+#' @return a data.frame with variables lat/lng
+#' @author Jun Cai (\email{cai-j12@@mails.tsinghua.edu.cn}), PhD student from 
+#' Center for Earth System Science, Tsinghua University
+#' @details BD-09 coordinate system is used by Baidu Maps and encrypted based on 
+#' GCJ-02 coordinates for information safety.
+#' @seealso \code{\link{gcj2bd}}, \code{\link{conv}}.
+#' 
+#' \url{http://blog.csdn.net/coolypf/article/details/8569813} for C version 
+#' source code.
+#' @export
+#' @examples
+#' \dontrun{
+#' # latitude/longitude coordinates of Beijing railway station
+#' # GCJ-02: (39.90245, 116.42703)
+#' # BD-09:  (39.90851, 116.43351)
+#' bd2gcj(39.90851, 116.43351) # correct
+#' }
 
 bd2gcj <- function(bdLat, bdLon){
   x <- bdLon - 0.0065
@@ -121,23 +218,51 @@ bd2gcj <- function(bdLat, bdLon){
 ### BD-09 => GCJ-02 ###
 
 ### WGS-84 <=> BD-09 ###
+#' Convert coordinates
+#'
+#' converts lat/lon coordintes from WGS-84 to BD-09
+#' 
+#' @param wgsLat a numeric latitude in WGS-84
+#' @param wgsLon a numeric longitude in WGS-84
+#' @return a data.frame with variables lat/lng
+#' @author Jun Cai (\email{cai-j12@@mails.tsinghua.edu.cn}), PhD student from 
+#' Center for Earth System Science, Tsinghua University
+#' @details convert WGS-84 coordinates first into GCJ-02, then into BD-09.
+#' @seealso \code{\link{wgs2gcj}}, \code{\link{gcj2bd}}, \code{\link{conv}}.
+#' @export
+#' @examples
+#' \dontrun{
+#' # latitude/longitude coordinates of Beijing railway station
+#' # WGS-84: (39.90105, 116.42079)
+#' # BD-09:  (39.90851, 116.43351)
+#' wgs2bd(39.90105, 116.42079) # correct
+#' }
+
 wgs2bd <- function(wgsLat, wgsLon){
   return(gcj2bd(wgs2gcj(wgsLat, wgsLon)[, 'lat'], wgs2gcj(wgsLat, wgsLon)[, 'lng']))
 }
+
+#' Convert coordinates
+#'
+#' converts lat/lon coordintes from BD-09 to WGS-84
+#' 
+#' @param bdLat a numeric latitude in BD-09
+#' @param bdLon a numeric longitude in BD-09
+#' @return a data.frame with variables lat/lng
+#' @author Jun Cai (\email{cai-j12@@mails.tsinghua.edu.cn}), PhD student from 
+#' Center for Earth System Science, Tsinghua University
+#' @details convert BD-09 coordinates first into GCJ-02, then into WGS-84.
+#' @seealso \code{\link{bd2gcj}}, \code{\link{gcj2wgs}}, \code{\link{conv}}.
+#' @export
+#' @examples
+#' \dontrun{
+#' # latitude/longitude coordinates of Beijing railway station
+#' # WGS-84: (39.90105, 116.42079)
+#' # BD-09:  (39.90851, 116.43351)
+#' bd2wgs(39.90851, 116.43351) # correct verifying by google earth
+#' }
 
 bd2wgs <- function(bdLat, bdLon){
   return(gcj2wgs(bd2gcj(bdLat, bdLon)[, 'lat'], bd2gcj(bdLat, bdLon)[, 'lng']))
 }
 ### WGS-84 <=> BD-09 ###
-
-# 北京站
-# WGS-84 (39.90105, 116.42079)
-# GCJ-02 (39.90245, 116.42703)
-# BD-09  (39.90851, 116.43351)
-# verifying
-# wgs2gcj(39.90105, 116.42079) # correct
-# wgs2bd(39.90105, 116.42079) # correct
-# gcj2wgs(39.90245, 116.42703) # correct verifying by google earth
-# gcj2bd(39.90245, 116.42703) # correct
-# bd2gcj(39.90851, 116.43351) # correct
-# bd2wgs(39.90851, 116.43351) # correct verifying by google earth

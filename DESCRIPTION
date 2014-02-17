@@ -1,9 +1,22 @@
 Package: geoChina
 Type: Package
-Title: What the package does (short line)
+Title: A package for geocoding, reverse geocoding and coordinates
+    transformation between WGS-84, GCJ-02 and BD-09
 Version: 1.0
 Date: 2014-02-15
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Jun Cai <cai-j12@mails.tsinghua.edu.cn>
+Maintainer: Jun Cai <cai-j12@mails.tsinghua.edu.cn>
+Description: In China the digital maps use two main Geographic Coordinate
+    Systems (GCSs), namely GCJ-09 and BD-09, rather than the well known WGS-84
+    because of information security. geoChina provides functions for the mutual
+    coordinate conversions between those three GCSs. Therefore, when geocoding
+    address or reverse geocoding latitude/longitude location by calling either
+    Google or Baidu Gecoding API, geoChina allows for inputting or outputing
+    the coordintes in the GCS different from the one that Google or Baidu map
+    uses.
+License: GPL-3
+Depends:
+    RCurl,
+    RJSONIO,
+    plyr,
+    R (>= 2.11.0)
