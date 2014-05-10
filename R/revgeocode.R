@@ -38,18 +38,28 @@
 #'            key = 'your baidu maps api key', output = 'address', messaging = TRUE)
 #' revgeocode(c(39.90105, 116.42079), ics = 'WGS-84', api = 'baidu', 
 #'            key = 'your baidu maps api key', output = 'addressc')
+#' # reverse geocode multiple locations
+#' latlng = data.frame(lat = c(39.99837, 39.98565), lng = c(116.3203, 116.2998))
+#' revgeocode(latlng, ics = 'WGS-84', api = 'google', output = 'address')
 #' }
 
 revgeocode <- function(latlng, ics = c('WGS-84', 'GCJ-02', 'BD-09'), 
                        api = c('google', 'baidu'), key = '', 
                        output = c('address', 'addressc'), messaging = FALSE){
   # check parameters
-  stopifnot(is.numeric(latlng) & length(latlng) == 2)
+  stopifnot(class(latlng) %in% c('numeric', 'data.frame'))
   ics <- match.arg(ics)
   api <- match.arg(api)
   stopifnot(is.character(key))
   output <- match.arg(output)
   stopifnot(is.logical(messaging))
+  
+  if(is.data.frame(latlng)){
+    return(ldply(seq_along(latlng), function(i){ revgeocode(as.numeric(latlng[i, ]), 
+                                                            ics = ics, api = api, 
+                                                            key = key, output = output, 
+                                                            messaging = messaging) }))
+  }
   
   # format url
   if(api == 'google'){

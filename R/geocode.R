@@ -23,6 +23,7 @@
 #' Google Maps API at \url{http://code.google.com/apis/maps/documentation/geocoding/} 
 #' and Baidu Maps API at \url{http://developer.baidu.com/map/webservice-geocoding.htm}
 #' @export
+#' @import plyr
 #' @examples
 #' \dontrun{
 #' geocode('Tsinghua University', api = 'google', ocs = 'GCJ-02')
@@ -48,9 +49,7 @@
 
 geocode <- function(address, api = c('google', 'baidu'), key = '', 
                     ocs = c('WGS-84', 'GCJ-02', 'BD-09'), 
-                    output = c('latlng', 'latlngc'), messaging = FALSE){
-  library(plyr)
-  
+                    output = c('latlng', 'latlngc'), messaging = FALSE){  
   # check parameters
   stopifnot(is.character(address))
   api <- match.arg(api)
@@ -68,10 +67,13 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
     }
           
     if(output == 'latlng' | output == 'latlngc'){
-      return(ldply(as.list(address), geocode, api = api, key = key, ocs = ocs, 
+      return(ldply(address, geocode, api = api, key = key, ocs = ocs, 
                    output = output, messaging = messaging))
     }
   }
+  
+  # location encoding
+  address <- enc2utf8(address)
   
   # format url
   if(api == 'google'){
@@ -116,6 +118,7 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
     
     # more than one location found?
     if(length(gc$results) > 1 && messaging){
+      Encoding(gc$results[[1]]$formatted_address) <- "UTF-8"
       message(paste('more than one location found for "', address, 
                     '", using address\n"', tolower(gc$results[[1]]$formatted_address), 
                     '"\n', sep = ''))

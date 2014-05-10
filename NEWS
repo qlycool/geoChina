@@ -1,0 +1,20 @@
+Version 1.1
+-------------------------------------------------------------------------
+NEW FEATURES
+
+* all functions support vectorize operation.
+
+FIXS
+
+* geocode Chinese address failed with status INVALID_REQUEST by calling google map api on Windows platform.
+* geocode with turning messaging on failed with Error "invalid multibyte string 1" by calling google map api on Windows platform.
+
+DOCUMENTATION CHANGES
+
+* add examples to illustrate vectorize operation feature.
+
+
+
+Version 1.0
+-------------------------------------------------------------------------
+PACKAGE GENESIS.

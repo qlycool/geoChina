@@ -37,9 +37,16 @@ ee <- (a^2 - b^2) / a^2
 #' # WGS-84: (39.90105, 116.42079)
 #' # GCJ-02: (39.90245, 116.42703)
 #' wgs2gcj(39.90105, 116.42079) # correct
+#' # convert multiple coordinates
+#' wgs2gcj(c(39.99837, 39.98565), c(116.3203, 116.2998))
 #' }
 
 wgs2gcj <- function(wgsLat, wgsLon){
+  # vectorize
+  if(length(wgsLat) > 1){
+    return(ldply(seq_along(wgsLat), function(i){ wgs2gcj(wgsLat[i], wgsLon[i]) }))
+  }
+  
   if(outofChina(wgsLat, wgsLon)){
     gcjLat <- wgsLat
     gcjLon <- wgsLat
@@ -82,6 +89,7 @@ transformLon <- function(x, y){
 }
 ### WGS-84 => GCJ-02 ###
 
+### GCJ-02 => WGS-84 ###
 #' Convert coordinates
 #'
 #' converts lat/lon coordintes from GCJ-02 to WGS-84
@@ -109,9 +117,10 @@ transformLon <- function(x, y){
 #' # WGS-84: (39.90105, 116.42079)
 #' # GCJ-02: (39.90245, 116.42703)
 #' gcj2wgs(39.90245, 116.42703) # correct verifying by google earth
+#' # convert multiple coordinates
+#' gcj2wgs(c(39.99967, 39.98691), c(116.3264, 116.3059))
 #' }
 
-### GCJ-02 => WGS-84 ###
 # wgs => gcj
 # offset dV = V' - V
 # question: gcj => wgs, namely V = V' - dV'
@@ -120,6 +129,11 @@ transformLon <- function(x, y){
 # dV, V must be known. since V and V' are very close to each other, initially 
 # using V' to approximate V.
 gcj2wgs <- function(gcjLat, gcjLon){
+  # vectorize
+  if(length(gcjLat) > 1){
+    return(ldply(seq_along(gcjLat), function(i){ gcj2wgs(gcjLat[i], gcjLon[i]) }))
+  }
+  
   g0 <- c(gcjLat, gcjLon)
   w0 <- g0
   g1 <- wgs2gcj(w0[1], w0[2])
@@ -133,6 +147,7 @@ gcj2wgs <- function(gcjLat, gcjLon){
 }
 ### GCJ-02 => WGS-84 ###
 
+### GCJ-02 => BD-09 ###
 #' Convert coordinates
 #'
 #' converts lat/lon coordintes from GCJ-02 to BD-09
@@ -155,9 +170,10 @@ gcj2wgs <- function(gcjLat, gcjLon){
 #' # GCJ-02: (39.90245, 116.42703)
 #' # BD-09:  (39.90851, 116.43351)
 #' gcj2bd(39.90245, 116.42703) # correct
+#' # convert multiple coordinates
+#' gcj2bd(c(39.99967, 39.98691), c(116.3264, 116.3059))
 #' }
 
-### GCJ-02 <=> BD-09 ###
 gcj2bd <- function(gcjLat, gcjLon){
   z <- sqrt(gcjLon^2 + gcjLat^2) + 0.00002 * sin(gcjLat * pi * 3000.0 / 180.0)
   theta <- atan2(gcjLat, gcjLon) + 0.000003 * cos(gcjLon * pi * 3000.0 / 180.0)
@@ -165,7 +181,9 @@ gcj2bd <- function(gcjLat, gcjLon){
   bdLat = z * sin(theta) + 0.006
   return(data.frame(lat = bdLat, lng = bdLon))
 }
+### GCJ-02 => BD-09 ###
 
+### BD-09 => GCJ-02 ###
 #' Convert coordinates
 #'
 #' converts lat/lon coordintes from BD-09 to GCJ-02
@@ -188,6 +206,8 @@ gcj2bd <- function(gcjLat, gcjLon){
 #' # GCJ-02: (39.90245, 116.42703)
 #' # BD-09:  (39.90851, 116.43351)
 #' bd2gcj(39.90851, 116.43351) # correct
+#' # convert multiple coordinates
+#' bd2gcj(c(40.00541, 39.99299), c(116.3330, 116.3124))
 #' }
 
 bd2gcj <- function(bdLat, bdLon){
@@ -199,7 +219,7 @@ bd2gcj <- function(bdLat, bdLon){
   gcjLat <- z * sin(theta)
   return(data.frame(lat = gcjLat, lng = gcjLon))
 }
-### GCJ-02 => BD-09 ###
+### BD-09 => GCJ-02 ###
 
 ### BD-09 => GCJ-02 ###
 # iteration algorithm same to gcj2wgs function
@@ -236,6 +256,8 @@ bd2gcj <- function(bdLat, bdLon){
 #' # WGS-84: (39.90105, 116.42079)
 #' # BD-09:  (39.90851, 116.43351)
 #' wgs2bd(39.90105, 116.42079) # correct
+#' # convert multiple coordinates
+#' wgs2bd(c(39.99837, 39.98565), c(116.3203, 116.2998))
 #' }
 
 wgs2bd <- function(wgsLat, wgsLon){
@@ -260,6 +282,8 @@ wgs2bd <- function(wgsLat, wgsLon){
 #' # WGS-84: (39.90105, 116.42079)
 #' # BD-09:  (39.90851, 116.43351)
 #' bd2wgs(39.90851, 116.43351) # correct verifying by google earth
+#' # convert multiple coordinates
+#' bd2wgs(c(40.00541, 39.99299), c(116.3330, 116.3124))
 #' }
 
 bd2wgs <- function(bdLat, bdLon){
