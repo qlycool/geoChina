@@ -100,13 +100,6 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
   if(messaging) message('done.')  
   close(connect)
   
-  # format geocoded data
-  NULLtoNA <- function(x){
-    if(is.null(x)) return(NA)
-    if(is.character(x) & nchar(x) == 0) return(NA)
-    x
-  }
-  
   # geocoding results
   if(api == 'google'){
     # did geocode fail?
@@ -156,4 +149,11 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
     if(output == 'latlng') return(gcdf[c('lat', 'lng')])
     if(output == 'latlngc') return(gcdf[c('lat', 'lng', 'conf')])
   }
+}
+
+# fill NULL with NA
+NULLtoNA <- function(x){
+  if(is.null(x)) return(NA)
+  if(is.character(x) & nchar(x) == 0) return(NA)
+  x
 }
