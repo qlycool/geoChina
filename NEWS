@@ -10,7 +10,11 @@ FIXS
 
 DOCUMENTATION CHANGES
 
-* detail on ics and ocs parameters.
+* more detail on ics and ocs parameters.
+
+IMPROVEMENTS
+
+* call google map api using https rather than http.
 
 
 
