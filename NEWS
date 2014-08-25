@@ -12,10 +12,6 @@ DOCUMENTATION CHANGES
 
 * more detail on ics and ocs parameters.
 
-IMPROVEMENTS
-
-* call google map api using https rather than http.
-
 
 
 Version 1.1.1

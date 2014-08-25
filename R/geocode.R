@@ -79,9 +79,12 @@ geocode <- function(address, api = c('google', 'baidu'), key = '',
   
   # format url
   if(api == 'google'){
-    # https://maps.googleapis.com/maps/api/geocode/json?address=ADDRESS&sensor
+    # https is only supported on Windows, when R is started with the --internet2 
+    # command line option. without this option, or on Mac, you will get the error 
+    # "unsupported URL scheme".
+    # http://maps.googleapis.com/maps/api/geocode/json?address=ADDRESS&sensor
     # =false&key=API_KEY
-    url_string <- paste('https://maps.googleapis.com/maps/api/geocode/json?address=', 
+    url_string <- paste('http://maps.googleapis.com/maps/api/geocode/json?address=', 
                         address, '&sensor=false', sep = '')
     if(nchar(key) > 0){
       url_string <- paste(url_string, '&key=', key, sep = '')

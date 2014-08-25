@@ -73,9 +73,9 @@ revgeocode <- function(latlng, ics = c('WGS-84', 'GCJ-02', 'BD-09'),
       }
     }
     
-    # https://maps.googleapis.com/maps/api/geocode/json?latlng=LAT,LNG
+    # http://maps.googleapis.com/maps/api/geocode/json?latlng=LAT,LNG
     # &sensor=FALSE&key=API_KEY
-    url_string <- paste('https://maps.googleapis.com/maps/api/geocode/json?latlng=', 
+    url_string <- paste('http://maps.googleapis.com/maps/api/geocode/json?latlng=', 
                         latlng[1], ',', latlng[2], '&sensor=false', sep = '')
     if(nchar(key) > 0){
       url_string <- paste(url_string, '&key=', key, sep = '')
