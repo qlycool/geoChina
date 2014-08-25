@@ -10,7 +10,8 @@
 #' @param to the outputting GCS
 #' @param api use baidu maps api. Note that baidu maps api only supports the 
 #' transformations from WGS-84 or GCJ-02 to BD-09. Other coodinate conversions 
-#' must be done locally.
+#' must be done locally. As the conversion result is the same, it's recommended 
+#' to perform conversions locally.
 #' @return a data.frame with variables lat/lng 
 #' @author Jun Cai (\email{cai-j12@@mails.tsinghua.edu.cn}), PhD student from 
 #' Center for Earth System Science, Tsinghua University
@@ -95,7 +96,9 @@ conv <- function(lat, lon, from = c('WGS-84', 'GCJ-02', 'BD-09'),
           return(cvdf)
         }
       } else{
-        warning(paste('convert failed with error ', cv['error'], sep = ''), 
+        warning(paste('convert failed with error ', cv['error'], 
+                      '. conversion is not supported by baidu map api.',
+                      sep = ''), 
                 call. = FALSE)
         return(data.frame(lat = NA, lng = NA))
       }

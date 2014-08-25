@@ -8,7 +8,8 @@
 #' @param latlng a location in latitude/longitude format
 #' @param ics the coordinate system of inputing location, including WGS-84, GCJ-02 
 #' and BD-09, which are the GCSs of Google Earth, Google Map in China and Baidu 
-#' Map, respectively.
+#' Map, respectively. For location out of China, ics is automatically set to 'WGS-84'
+#' and other values are ignored.
 #' @param api use google or baidu maps api
 #' @param key an api key must be provided when calling baidu maps api. 
 #' While it's unnecessary for calling google maps api.
@@ -63,12 +64,18 @@ revgeocode <- function(latlng, ics = c('WGS-84', 'GCJ-02', 'BD-09'),
   
   # format url
   if(api == 'google'){
-    # convert coordinates
-    latlng <- conv(latlng[1], latlng[2], from = ics, to = 'GCJ-02')
+    # convert coordinates only in China
+    if(!outofChina(latlng[1], latlng[2])){
+      latlng <- conv(latlng[1], latlng[2], from = ics, to = 'GCJ-02')
+    } else{
+      if(ics != 'WGS-84'){
+        message('wrong usage: for location out of China, ics can only be set to "WGS-84"', appendLF = T)
+      }
+    }
     
-    # http://maps.googleapis.com/maps/api/geocode/json?latlng=LAT,LNG
+    # https://maps.googleapis.com/maps/api/geocode/json?latlng=LAT,LNG
     # &sensor=FALSE&key=API_KEY
-    url_string <- paste('http://maps.googleapis.com/maps/api/geocode/json?latlng=', 
+    url_string <- paste('https://maps.googleapis.com/maps/api/geocode/json?latlng=', 
                         latlng[1], ',', latlng[2], '&sensor=false', sep = '')
     if(nchar(key) > 0){
       url_string <- paste(url_string, '&key=', key, sep = '')
@@ -107,7 +114,7 @@ revgeocode <- function(latlng, ics = c('WGS-84', 'GCJ-02', 'BD-09'),
     # more than one address found?
     if(length(rgc$results) > 1 && messaging){
       message(paste('more than one address found for "', latlng[1], ', ', 
-                    latlng[2],  '", reverse geocoding first ...\n', sep = ''))
+                    latlng[2],  '", reverse geocoding first ...', sep = ''), apppendLF = T)
     }
     
     rgcdf <- with(rgc$results[[1]], {data.frame(address = formatted_address, 

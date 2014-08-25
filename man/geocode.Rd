@@ -16,7 +16,9 @@ geocode(address, api = c("google", "baidu"), key = "", ocs = c("WGS-84",
 While it's unnecessary for calling google maps api.}
 
 \item{ocs}{output coordinate systems including WGS-84, GCJ-02 and BD-09, which
-are the GCSs of Google Earth, Google Map in China and Baidu Map, respectively.}
+are the GCSs of Google Earth, Google Map in China and Baidu Map, respectively.
+For address out of China, ocs is automatically set to 'WGS-84' and other values
+are igored.}
 
 \item{output}{lat/lng coordinates or lat/lng coordinates with confidence}
 
@@ -26,7 +28,7 @@ are the GCSs of Google Earth, Google Map in China and Baidu Map, respectively.}
 a data.frame with variables lat/lng or lat/lng/conf
 }
 \description{
-geocodes an address using Google or Baidu Maps.  Note that in most cases by
+geocodes an address using Google or Baidu Maps. Note that in most cases by
 using this function you are agreeing to the Google Maps API Terms of Service
 at \url{https://developers.google.com/maps/terms} or the Baidu Maps API Terms
 of Use at \url{http://developer.baidu.com/map/law.htm}.

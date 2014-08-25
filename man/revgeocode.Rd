@@ -12,7 +12,8 @@ revgeocode(latlng, ics = c("WGS-84", "GCJ-02", "BD-09"), api = c("google",
 
 \item{ics}{the coordinate system of inputing location, including WGS-84, GCJ-02
 and BD-09, which are the GCSs of Google Earth, Google Map in China and Baidu
-Map, respectively.}
+Map, respectively. For location out of China, ics is automatically set to 'WGS-84'
+and other values are ignored.}
 
 \item{api}{use google or baidu maps api}
 

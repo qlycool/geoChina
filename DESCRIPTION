@@ -2,8 +2,8 @@ Package: geoChina
 Type: Package
 Title: A package for geocoding, reverse geocoding and coordinate
     transformations between WGS-84, GCJ-02 and BD-09 coordinate systems
-Version: 1.1.1
-Date: 2014-06-25
+Version: 1.1.2
+Date: 2014-08-26
 Author: Jun Cai <cai-j12@mails.tsinghua.edu.cn>
 Maintainer: Jun Cai <cai-j12@mails.tsinghua.edu.cn>
 Description: In China the digital maps use two main Geographic Coordinate

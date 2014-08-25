@@ -17,7 +17,8 @@ conv(lat, lon, from = c("WGS-84", "GCJ-02", "BD-09"), to = c("WGS-84",
 
 \item{api}{use baidu maps api. Note that baidu maps api only supports the
 transformations from WGS-84 or GCJ-02 to BD-09. Other coodinate conversions
-must be done locally.}
+must be done locally. As the conversion result is the same, it's recommended
+to perform conversions locally.}
 }
 \value{
 a data.frame with variables lat/lng
